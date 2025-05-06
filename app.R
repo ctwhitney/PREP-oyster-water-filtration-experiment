@@ -238,26 +238,39 @@ server <- function(input, output, session) {
     }
   })
   
-  # Fixed validation function that properly checks all fields
-  check_inputs <- reactive({
+  # Improved validation function with better checks and debouncing
+  validate_inputs <- reactive({
     # Explicitly get the values to ensure we have the latest
     school_val <- input$school
     tank_val <- input$tank
     turbidity_val <- input$turbidity
     
-    # Check if any required field is missing or invalid
-    if (is.null(school_val) || school_val == "" || 
-        is.null(tank_val) || tank_val == "" || 
-        is.null(turbidity_val) || is.na(turbidity_val)) {
-      return(FALSE)
+    # Enhanced validation with more detailed feedback
+    if (is.null(school_val) || trimws(school_val) == "") {
+      return(list(valid = FALSE, message = "Please enter a school name"))
     }
-    return(TRUE)
+    
+    if (is.null(tank_val) || tank_val == "") {
+      return(list(valid = FALSE, message = "Please select a tank type"))
+    }
+    
+    if (is.null(turbidity_val) || is.na(turbidity_val)) {
+      return(list(valid = FALSE, message = "Please enter a turbidity value"))
+    }
+    
+    # Additional validation for turbidity
+    if (!is.numeric(turbidity_val)) {
+      return(list(valid = FALSE, message = "Turbidity must be a number"))
+    }
+    
+    return(list(valid = TRUE, message = "All inputs valid"))
   })
   
   observeEvent(input$submit, {
-    # Use the validation function
-    if (!check_inputs()) {
-      showNotification("Please fill out all fields.", type = "error")
+    # Use the enhanced validation function
+    validation_result <- validate_inputs()
+    if (!validation_result$valid) {
+      showNotification(validation_result$message, type = "warning")
       return()
     }
     
@@ -330,9 +343,15 @@ server <- function(input, output, session) {
       data_reactive(new_entry)
     }
     
+    # Success notification
+    showNotification("Observation successfully recorded!", type = "message")
+    
     # Clear fields after submission
     updateTextInput(session, "school", value = "")
+    updateSelectInput(session, "tank", selected = "")
     updateNumericInput(session, "turbidity", value = NA)
+    
+    # Focus on school field again
     shinyjs::runjs("document.getElementById('school').focus()")
   })
   
