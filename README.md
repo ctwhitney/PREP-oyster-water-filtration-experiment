@@ -48,3 +48,8 @@ After the experiment is complete, this repository will be updated with:
 - Final visualization of results
 - Access to the complete dataset
 - Instructions for educators on how to run similar experiments
+
+## Special thanks to
+- UNH Jackson Estuarine Lab for providing equipment
+- Fox Point Oysters and Laura Brown for supplying oysters for the experiment
+- UNH Water Quality Analysis Lab for lending a water quality meter

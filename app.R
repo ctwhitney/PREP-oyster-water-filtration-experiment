@@ -121,7 +121,7 @@ if (!file.exists(data_file)) {
 
 ui <- fluidPage(
   useShinyjs(),  # Initialize shinyjs
-  titlePanel("Oyster Water Cleaning Experiment"),
+  titlePanel("Oyster Water Filtration Experiment"),
   
   # Logo using server-side rendering
   imageOutput("logo", height = "80px"),
@@ -139,15 +139,36 @@ ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
       textInput("school", "School Name"),
-      selectInput("tank", "Tank Type", choices = c("With Oysters", "Without Oysters")),
-      numericInput("turbidity", "Turbidity (NTU)", value = NA, min = 0),
+      radioButtons("tank", "Tank Type", choices = c("Oyster Tank", "Control Tank"),
+                   selected = character(0)),
+      numericInput("turbidity", "Turbidity (FNU)", value = NA, min = 0),
       actionButton("submit", "Submit Observation"),
       tags$p(style = "color: #666; font-style: italic; margin-top: 5px;", 
-             "Press Enter to submit")
+             "Press Enter to submit"),
+      tags$p("Instructions:", style = "font-weight: bold"),
+      tags$ul(
+        tags$li("Enter school name, tank type, and turbidity reading"),
+        tags$li("Submit data using the button or by pressing Enter")
+        #tags$li("Click on any data point to mark it as 'censored' (e.g., for errors)"),
+        #tags$li("Toggle the 'Show censored points' checkbox to view or hide censored data"),
+        #tags$li("Click anywhere outside the menu to dismiss it")
+      )
     ),
     
     mainPanel(
-      plotlyOutput("turbidityPlot")
+      plotlyOutput("turbidityPlot"),
+      tags$div(
+        style = "margin-top: 20px; color: #666;",
+        tags$p("Experimental Design:", style = "font-weight: bold"),
+        tags$ul(
+          tags$li("Two 10 gallon tanks of water from Great Bay"),
+          tags$li("Each tank has about 0.15 grams of dried ", tags$i("Spirulina"), " algae"),
+          tags$li("Oysters are added to the 'Oyster Tank' while the 'Control Tank' has no oysters"),
+          tags$li("We measure turbidity in Formazin Nephelometric Units (FNU) using a YSI ProDSS"),
+          tags$li("Oysters (filter feeders) eat the algae and should reduce turbidity in the tank"),
+          tags$li("Oysters are an important part of the Great Bay ecosystem and help keep Great Bay Estuary clean"),
+        )
+      )
     )
   )
 )
@@ -372,7 +393,7 @@ server <- function(input, output, session) {
           "School: ", School, "\n",
           "Tank: ", Tank, "\n",
           "Time: ", format(Time, "%H:%M", tz = "America/New_York"), "\n",
-          "Turbidity: ", Turbidity, " NTU"
+          "Turbidity: ", Turbidity, " FNU"
         )
       )
     
@@ -384,7 +405,7 @@ server <- function(input, output, session) {
         "School: ", School, "\n",
         "Tank: ", Tank, "\n",
         "Time: ", format(Time, "%H:%M"), "\n",
-        "Turbidity: ", Turbidity, " NTU"
+        "Turbidity: ", Turbidity, " FNU"
       )
     )) +
       geom_point(size = 3) +
@@ -392,7 +413,7 @@ server <- function(input, output, session) {
       scale_x_datetime(labels = date_format("%H:%M", tz = "America/New_York"), breaks = pretty_breaks(n = 8)) +
       labs(title = "Turbidity Over Time",
            x = "Time",
-           y = "Turbidity (NTU)") +
+           y = "Turbidity (FNU)") +
       theme_minimal() +
       theme(axis.text.x = element_text(angle = 45, hjust = 1),
             legend.position = "bottom")
